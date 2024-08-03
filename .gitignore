@@ -185,7 +185,7 @@ project/plugins/project/
 .history
 .cache
 .lib/
-
+src/main/resources/application.conf
 ### SBT Patch ###
 .bsp/
 
