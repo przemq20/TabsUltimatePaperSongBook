@@ -3,14 +3,15 @@ package parsers
 import model.Capo
 import model.Difficulty
 import model.Key
-import model.Lyrics
 import model.Song
 import org.openqa.selenium.By
 import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.firefox.FirefoxDriverLogLevel
 import org.openqa.selenium.firefox.FirefoxOptions
 
+import java.time.Duration
 import java.util.logging.Level
+import scala.concurrent.duration.DurationInt
 import scala.jdk.CollectionConverters._
 
 class SongParser extends Parser[Song] {
@@ -27,13 +28,17 @@ class SongParser extends Parser[Song] {
   def parse(song: Song): Song = {
     System.setProperty("webdriver.gecko.driver", "/usr/local/bin/geckodriver")
 //    System.setProperty(FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE, "true")
-    System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null")
+//    System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null")
     val options = new FirefoxOptions()
     options.setHeadless(true)
-    options.setLogLevel(FirefoxDriverLogLevel.fromLevel(Level.OFF))
+//    options.setLogLevel(FirefoxDriverLogLevel.fromLevel(Level.OFF))
 
     val driver = new FirefoxDriver(options)
-//    driver.setLogLevel(Level.OFF)
+    driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(20));
+    driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(20));
+
+
+    //    driver.setLogLevel(Level.OFF)
     driver.manage.window.maximize()
     scribe.info(s"Downloading info from ${song.title}")
 
@@ -48,7 +53,7 @@ class SongParser extends Parser[Song] {
     val text                = driver.findElement(By.cssSelector(".tK8GG")).getText.split("\n").toList
     val tekstowo            = new TekstowoParser
     val lyrics              = tekstowo.parseJsoup(song.author, title)
-    scribe.info(s"Downloading info from ${song.title} completed")
+    scribe.info(s"[COMPLETED] Downloading info from ${song.title}")
 
     driver.quit()
     Song(song.author, title, song.url, difficulty, key, capo, tuning, text, lyrics)

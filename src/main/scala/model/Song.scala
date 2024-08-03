@@ -9,7 +9,7 @@ case class Song(
   capo:       Option[Capo]       = None,
   tuning:     Option[String]     = None,
   text:       List[String]       = Nil,
-  lyrics:     Lyrics             = Lyrics(Nil)
+  lyrics:     List[String]       = Nil
 ) {}
 object Song {
   def empty: Song = Song("", "", "")

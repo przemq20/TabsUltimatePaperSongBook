@@ -1,4 +1,4 @@
-package SongBook
+package songBook
 
 import model.Capo.NoCapo
 import model.Capo.`2ndFret`

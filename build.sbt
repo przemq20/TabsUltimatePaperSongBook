@@ -19,4 +19,7 @@ libraryDependencies ++= Seq(
   "com.outr" %% "scribe" % "3.15.0",
   "org.apache.poi" % "poi" % "5.3.0",
   "org.apache.poi" % "poi-ooxml" % "5.2.3",
+  "org.slf4j" % "slf4j-api" % "2.0.13",
+  "org.slf4j" % "slf4j-simple" % "2.0.13"
+
 )

@@ -1,67 +1,49 @@
 package parsers
 
-import model.Lyrics
 import model.Song
 import org.jsoup.Jsoup
 import scala.jdk.CollectionConverters._
 
-class TekstowoParser {
-  def tekstowoTitle(str: String): String = {
-    val replacements = Map(
-      'ą' -> 'a',
-      'ć' -> 'c',
-      'ę' -> 'e',
-      'ł' -> 'l',
-      'ń' -> 'n',
-      'ó' -> 'o',
-      'ś' -> 's',
-      'ź' -> 'z',
-      'ż' -> 'z',
-      'Ą' -> 'A',
-      'Ć' -> 'C',
-      'Ę' -> 'E',
-      'Ł' -> 'L',
-      'Ń' -> 'N',
-      'Ó' -> 'O',
-      'Ś' -> 'S',
-      'Ź' -> 'Z',
-      'Ż' -> 'Z'
-    )
+class TekstowoParser extends App {
+//  parseJsoup("a","Kilku Kumpli Weź")
+//  parseJsoup("Ed Sheeran", "I see fire")
+//  parseJsoup("Ed Sheeran", "Im Still Standing")
 
-    str.map { char =>
-      replacements.getOrElse(char, char)
-    }.toLowerCase
-      .replace(" ", "_")
-      .replace("-", "_")
+  def processLines(lines: List[String]): List[String] = {
+    lines.foldLeft(List.empty[String]) { (acc, line) =>
+      acc match {
+        case _ if acc.isEmpty                                                                   => acc :+ line
+        case _ if acc.size > 1 && line.trim.isEmpty && acc.takeRight(2).forall(_.trim.isEmpty)  => acc
+        case _ if acc.size > 1 && line.trim.nonEmpty && acc.takeRight(2).forall(_.trim.isEmpty) => acc.dropRight(1) :+ line
+        case _ if acc.size > 1 && line.trim.isEmpty && acc.takeRight(1).forall(_.trim.isEmpty)  => acc :+ line
+        case _ if acc.size > 1 && line.trim.nonEmpty && acc.last.trim.isEmpty                   => acc.dropRight(1) :+ line
+        case _ if acc.size > 0 && line.trim.isEmpty && acc.takeRight(1).forall(_.trim.nonEmpty) => acc :+ line
+        case _                                                                                  =>
+          println(line)
+          acc :+ line
+      }
+    }
   }
 
-  def parseJsoup(author: String, title: String): Lyrics = {
-    val url = (author, title) match {
-      case ("a-ha", "Take On Me Acoustic Live") =>
-        s"https://www.tekstowo.pl/piosenka,${tekstowoTitle(author)},${tekstowoTitle("Take on me")}.html"
-      case (_, "Jolka Jolka Pamiętasz") => "https://www.tekstowo.pl/piosenka,budka_suflera,jolka__jolka_pamietasz_.html"
-      case (_, "Wehikuł Czasu") => "https://www.tekstowo.pl/piosenka,dzem,wehikul_czasu_.html"
-      case (_, "Im Still Standing") => "https://www.tekstowo.pl/piosenka,elton_john,i_m_still_standing.html"
-      case (_, _) => s"https://www.tekstowo.pl/piosenka,${tekstowoTitle(author)},${tekstowoTitle(title)}.html"
-    }
+  def parseJsoup(author: String, title: String): List[String] = {
+    val url = TekstowoUnrecognizedSongs.getUrl(author, title)
+
     try {
-      val a = Jsoup.connect(url).get()
-      val lyrics: Lyrics = Lyrics(a.select(".song-text").select(".inner-text").get(0).wholeText()
-        .replaceAll("\r", "\n")
-        .replace("\n\n", "%%%")
-        .replace("\n", "")
-        .lines()
-        .filter(_.nonEmpty)
-        .map(_.replaceAll("%%%{2,}", "%%%%%%"))
-        .map(a => a.replaceAll("%%%", "\n"))
-        .toList.asScala.toList)
+      val a = Jsoup.connect(url).timeout(1000 * 10).get()
+      val lyrics: List[String] = a.select(".song-text").select(".inner-text").get(0).wholeText()
+        .replaceAll("\n\r\n", "\n\n")
+        .split("\n")
+        .toList
+//      lyrics.zipWithIndex.foreach(a => println(s"${a._2} ${a._1}"))
+
+      val newL = processLines(lyrics)
+      newL.zipWithIndex.foreach(a => println(s"${a._2} ${a._1}"))
       lyrics
       //    Song(song.author, song.title, song.url, song.difficulty, song.key, song.capo, song.tuning, song.text, lyrics)
-    }
-    catch {
+    } catch {
       case e: Exception =>
-        scribe.error(s"Couldn't downolad lyrics for: $author-$title, url: $url")
-        Lyrics(Nil)
+        scribe.error(s"Couldn't downolad lyrics for: $author-$title, url: $url - ${e.getMessage}")
+        List("ERROR - No TEXT")
     }
   }
 }

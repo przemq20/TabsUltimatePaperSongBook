@@ -1,4 +1,4 @@
-package SongBook
+package songBook
 
 import java.io.FileOutputStream
 import model.Song
@@ -6,7 +6,7 @@ import org.apache.poi.wp.usermodel.HeaderFooterType
 import org.apache.poi.xwpf.usermodel._
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr
 
-class SongBookCreator {
+class SongBookWithChordsCreator extends SongBookCreator {
 
   //  val songs = ExampleSongs.exampleSongs
   def createSongBook(songs: List[Song]): Unit = {
@@ -97,7 +97,7 @@ class SongBookCreator {
       runInfo.setText(
         s"""Trudność: ${song.difficulty.map(_.toString).getOrElse("N/A")}
            |Klucz: ${song.key.map(_.toString).getOrElse("N/A")}
-           |Capo: ${song.capo.map(_.toString).getOrElse("N/A")}
+           |Capo: ${song.capo.map(_.toString).getOrElse("No Capo")}
            |Strojenie: ${song.tuning.getOrElse("N/A")}
        """.stripMargin
       )
