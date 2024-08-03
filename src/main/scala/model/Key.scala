@@ -85,7 +85,7 @@ object Key {
       case "Gm"          => Some(Gm)
       case "G#m" | "Abm" => Some(`G#m`)
       case a @ _         =>
-        scribe.warn(s"Not recognized key option: $a")
+        if (a.trim.isEmpty) scribe.warn(s"Not recognized key option: $a")
         None
     }
   }

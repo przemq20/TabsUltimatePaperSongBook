@@ -1,48 +1,68 @@
 package parsers
 
 object TekstowoUnrecognizedSongs {
+
+  val replacements = Map(
+    'ą' -> 'a',
+    'ć' -> 'c',
+    'ę' -> 'e',
+    'ł' -> 'l',
+    'ń' -> 'n',
+    'ó' -> 'o',
+    'ś' -> 's',
+    'ź' -> 'z',
+    'ż' -> 'z',
+    'Ą' -> 'A',
+    'Ć' -> 'C',
+    'Ę' -> 'E',
+    'Ł' -> 'L',
+    'Ń' -> 'N',
+    'Ó' -> 'O',
+    'Ś' -> 'S',
+    'Ź' -> 'Z',
+    'Ż' -> 'Z'
+  )
+
   def getUrl(author: String, title: String): String = {
     (author, title) match {
-      case ("a-ha", "Take On Me Acoustic Live") => "https://www.tekstowo.pl/piosenka,a_ha,take_on_me.html"
-      case (_, "Jolka Jolka Pamiętasz")         => "https://www.tekstowo.pl/piosenka,budka_suflera,jolka__jolka_pamietasz_.html"
-      case (_, "Wehikuł Czasu")                 => "https://www.tekstowo.pl/piosenka,dzem,wehikul_czasu_.html"
-      case (_, "Im Still Standing")             => "https://www.tekstowo.pl/piosenka,elton_john,i_m_still_standing.html"
-      case (_, "Kilku Kumpli Weź")              => "https://www.tekstowo.pl/piosenka,anna_jurksztowicz,kilku_kumpli_we_.html"
-      case (_, "Dont Give Up On Me")            => "https://www.tekstowo.pl/piosenka,andy_grammer,don_t_give_up_on_me.html"
-      case (_, "Im Yours")                      => "https://www.tekstowo.pl/piosenka,jason_mraz,i_m_yours.html"
+      case ("Misc Traditional", "Bella Ciao")                                                         =>
+        "https://www.tekstowo.pl/piosenka,bella_ciao,bella_ciao.html"
+      case ("Misc Traditional", "Morskie Opowieści")                                                  =>
+        "https://www.tekstowo.pl/piosenka,szanty,morskie_opowiesci.html"
+      case ("Misc Cartoons", "Fineasz I Ferb - Theme")                                                =>
+        "https://www.tekstowo.pl/piosenka,fineasz_i_ferb,czolowka.html"
+      case ("Misc Traditional", "Bitwa")                                                              =>
+        "https://www.tekstowo.pl/piosenka,mechanicy_szanty,bitwa.html"
+      case ("Myslovitz", "Nigdy Nie Znajdziesz Sobie Przyjaciół Jeśli Nie Będziesz Taki Jak Wszyscy") =>
+        "https://www.tekstowo.pl/piosenka,myslovitz,nigdy_nie_znajdziesz_sobie_przyjaciol__.html"
+      case ("Taylor Swift", "Love Story - You Belong With Me Live")                                   =>
+        "https://www.tekstowo.pl/piosenka,taylor_swift,love_story.html"
+      case ("Edyta Górniak and Mieczysław Szcześniak", "Dumka Na Dwa Serca")                          =>
+        "https://www.tekstowo.pl/piosenka,edyta_gorniak,dumka_na_dwa_serca.html"
+      case ("Męskie Granie Orkiestra 2021", "Nikt Tak Pięknie Nie Mówił Że Się Boi Miłości")          =>
+        "https://www.tekstowo.pl/piosenka,daria_zawialow__dawid_podsiadlo,nikt_tak_pieknie_nie_mowil__ze_sie_boi_milosci.html"
+      case ("Misc Cartoons", "Vaiana - Drobnostka")                                                   =>
+        "https://www.tekstowo.pl/piosenka,igor_kwiatkowski,drobnostka.html"
 
-      case (_, _)                               => s"https://www.tekstowo.pl/piosenka,${tekstowoTitle(author)},${tekstowoTitle(title)}.html"
+      case (_, _) => s"https://www.tekstowo.pl/piosenka,${tekstowoTitle(author)},${tekstowoTitle(title)}.html"
     }
 
   }
 
   def tekstowoTitle(str: String): String = {
-    val replacements = Map(
-      'ą' -> 'a',
-      'ć' -> 'c',
-      'ę' -> 'e',
-      'ł' -> 'l',
-      'ń' -> 'n',
-      'ó' -> 'o',
-      'ś' -> 's',
-      'ź' -> 'z',
-      'ż' -> 'z',
-      'Ą' -> 'A',
-      'Ć' -> 'C',
-      'Ę' -> 'E',
-      'Ł' -> 'L',
-      'Ń' -> 'N',
-      'Ó' -> 'O',
-      'Ś' -> 'S',
-      'Ź' -> 'Z',
-      'Ż' -> 'Z'
-    )
-
     str.map { char =>
       replacements.getOrElse(char, char)
     }.toLowerCase
       .replace(" ", "_")
       .replace("-", "_")
+  }
+
+  def tekstowoSearch(author: String, title: String): String = {
+    s"$author+$title".map { char =>
+      replacements.getOrElse(char, char)
+    }.toLowerCase
+      .replace(" ", "+")
+      .replace("-", "+")
   }
 
 }

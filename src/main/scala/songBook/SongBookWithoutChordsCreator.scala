@@ -1,11 +1,12 @@
 package songBook
 
+import java.io.FileOutputStream
 import model.Song
 import org.apache.poi.wp.usermodel.HeaderFooterType
-import org.apache.poi.xwpf.usermodel.{BreakType, ParagraphAlignment, TextAlignment, XWPFDocument}
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr
-
-import java.io.FileOutputStream
+import org.apache.poi.xwpf.usermodel.BreakType
+import org.apache.poi.xwpf.usermodel.ParagraphAlignment
+import org.apache.poi.xwpf.usermodel.TextAlignment
+import org.apache.poi.xwpf.usermodel.XWPFDocument
 
 class SongBookWithoutChordsCreator extends SongBookCreator {
   //  val songs = ExampleSongs.exampleSongs
@@ -29,26 +30,6 @@ class SongBookWithoutChordsCreator extends SongBookCreator {
       run.setText("Page ")
       paragraph.getCTP.addNewFldSimple().setInstr("PAGE \\* MERGEFORMAT")
     }
-
-    // Ustawienie marginesów dla stron parzystych i nieparzystych
-    def setPageMargins(section: CTSectPr, leftEven: Int, rightEven: Int, leftOdd: Int, rightOdd: Int): Unit = {
-      val pageMar   = section.addNewPgMar()
-      pageMar.setLeft(leftOdd)
-      pageMar.setRight(rightOdd)
-      pageMar.setTop(1440)
-      pageMar.setBottom(1440)
-      addPageNumbers(document)
-      val sectPr    = document.getDocument.getBody.getSectPr
-      val pgMarEven = sectPr.addNewPgMar()
-      pgMarEven.setLeft(leftEven)
-      pgMarEven.setRight(rightEven)
-      pgMarEven.setTop(1440)
-      pgMarEven.setBottom(1440)
-    }
-
-    // Dodanie pierwszej sekcji z marginesami
-    val sectPr = document.getDocument.getBody.addNewSectPr()
-    setPageMargins(sectPr, 720, 1440, 1440, 720)
 
     // Dodanie strony tytułowej
     val titlePage = document.createParagraph()
@@ -77,7 +58,7 @@ class SongBookWithoutChordsCreator extends SongBookCreator {
         tocEntry.setAlignment(ParagraphAlignment.LEFT)
         val runEntry = tocEntry.createRun()
         runEntry.setText(s"${index + 1}. ${song.author} - ${song.title}")
-        runEntry.setFontSize(12)
+        runEntry.setFontSize(10)
     }
     addPageBreak(document)
 
@@ -88,45 +69,16 @@ class SongBookWithoutChordsCreator extends SongBookCreator {
       header.setAlignment(ParagraphAlignment.CENTER)
       val runHeader = header.createRun()
       runHeader.setText(s"${tuple._2 + 1} - ${song.author} - ${song.title}")
-      runHeader.setFontSize(20)
+      runHeader.setFontSize(15)
       runHeader.setBold(true)
 
-//      val info    = document.createParagraph()
-//      info.setAlignment(ParagraphAlignment.LEFT)
-//      val runInfo = info.createRun()
-//      runInfo.setText(
-//        s"""Trudność: ${song.difficulty.map(_.toString).getOrElse("N/A")}
-//           |Klucz: ${song.key.map(_.toString).getOrElse("N/A")}
-//           |Capo: ${song.capo.map(_.toString).getOrElse("N/A")}
-//           |Strojenie: ${song.tuning.getOrElse("N/A")}
-//       """.stripMargin
-//      )
-//      runInfo.setFontSize(11)
-
       // Podziel tekst na dwie kolumny
-      val textTable = document.createTable()
-      textTable.removeBorders()
 
-      val tableRow = textTable.createRow()
-      val column1  = tableRow.getCell(0)
-      val column2  = tableRow.addNewTableCell()
-
-      val halfTextLength = (song.lyrics.length + 1) / 2
-      song.lyrics.map(a => s"$a\n").splitAt(halfTextLength) match {
-        case (firstHalf, secondHalf) =>
-          firstHalf.foreach { line =>
-            val para = column1.addParagraph()
-            para.setSpacingBetween(1.0)
-            val run  = para.createRun()
-            run.setText(line)
-            run.setFontSize(12)
-          }
-          secondHalf.foreach { line =>
-            val para = column2.addParagraph()
-            val run  = para.createRun()
-            run.setText(line)
-            run.setFontSize(11)
-          }
+      song.lyrics.map(l => s"$l\n").foreach { line =>
+        val paragraph = document.createParagraph()
+        val run       = paragraph.createRun()
+        run.setText(line)
+        run.setFontSize(10)
       }
 
       addPageBreak(document)

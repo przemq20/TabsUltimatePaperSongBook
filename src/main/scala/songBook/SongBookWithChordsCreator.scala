@@ -119,7 +119,7 @@ class SongBookWithChordsCreator extends SongBookCreator {
             para.setSpacingBetween(1.0)
             val run  = para.createRun()
             run.setText(line)
-            run.setFontSize(12)
+            run.setFontSize(11)
           }
           secondHalf.foreach { line =>
             val para = column2.addParagraph()

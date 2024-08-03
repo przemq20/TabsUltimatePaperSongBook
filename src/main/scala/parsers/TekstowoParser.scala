@@ -1,13 +1,9 @@
 package parsers
 
-import model.Song
 import org.jsoup.Jsoup
-import scala.jdk.CollectionConverters._
+import parsers.TekstowoUnrecognizedSongs.tekstowoSearch
 
 class TekstowoParser extends App {
-//  parseJsoup("a","Kilku Kumpli Weź")
-//  parseJsoup("Ed Sheeran", "I see fire")
-//  parseJsoup("Ed Sheeran", "Im Still Standing")
 
   def processLines(lines: List[String]): List[String] = {
     lines.foldLeft(List.empty[String]) { (acc, line) =>
@@ -18,32 +14,42 @@ class TekstowoParser extends App {
         case _ if acc.size > 1 && line.trim.isEmpty && acc.takeRight(1).forall(_.trim.isEmpty)  => acc :+ line
         case _ if acc.size > 1 && line.trim.nonEmpty && acc.last.trim.isEmpty                   => acc.dropRight(1) :+ line
         case _ if acc.size > 0 && line.trim.isEmpty && acc.takeRight(1).forall(_.trim.nonEmpty) => acc :+ line
-        case _                                                                                  =>
-          println(line)
-          acc :+ line
+        case _                                                                                  => acc :+ line
       }
     }
   }
 
-  def parseJsoup(author: String, title: String): List[String] = {
+  def parseJsoup(url: String): List[String] = {
+    val a = Jsoup.connect(url).timeout(1000 * 10).get()
+    val lyrics: List[String] = a.select(".song-text").select(".inner-text").get(0).wholeText()
+      .replaceAll("\n\r\n", "\n\n")
+      .split("\n")
+      .toList
+    val newL = processLines(lyrics)
+//    println(newL)
+    newL
+
+  }
+
+  def parse(author: String, title: String): List[String] = {
     val url = TekstowoUnrecognizedSongs.getUrl(author, title)
-
     try {
-      val a = Jsoup.connect(url).timeout(1000 * 10).get()
-      val lyrics: List[String] = a.select(".song-text").select(".inner-text").get(0).wholeText()
-        .replaceAll("\n\r\n", "\n\n")
-        .split("\n")
-        .toList
-//      lyrics.zipWithIndex.foreach(a => println(s"${a._2} ${a._1}"))
-
-      val newL = processLines(lyrics)
-      newL.zipWithIndex.foreach(a => println(s"${a._2} ${a._1}"))
-      lyrics
-      //    Song(song.author, song.title, song.url, song.difficulty, song.key, song.capo, song.tuning, song.text, lyrics)
+      parseJsoup(url)
     } catch {
       case e: Exception =>
-        scribe.error(s"Couldn't downolad lyrics for: $author-$title, url: $url - ${e.getMessage}")
-        List("ERROR - No TEXT")
+        scribe.warn(s"Trying to get alternative link to $title lyrics")
+        val url           = s"https://www.tekstowo.pl/szukaj,${tekstowoSearch(author, title)}.html"
+        val response      = Jsoup.connect(url).timeout(1000 * 10).get()
+        val maybeSongLink = response.select(".flex-group")
+        if (maybeSongLink.size() > 0) {
+          val songLink = s"https://www.tekstowo.pl${maybeSongLink.get(0).children().get(1).attributes().get("href")}"
+          scribe.info(s"Got alternative link to $title lyrics - $songLink")
+          val lyrics   = parseJsoup(songLink)
+          lyrics
+        } else {
+          scribe.error(s"Couldn't downolad lyrics for: $author-$title, url: $url - ${e.getMessage}")
+          List("ERROR - No TEXT")
+        }
     }
   }
 }
