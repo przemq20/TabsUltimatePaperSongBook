@@ -20,6 +20,8 @@ libraryDependencies ++= Seq(
   "org.apache.poi" % "poi" % "5.3.0",
   "org.apache.poi" % "poi-ooxml" % "5.2.3",
   "org.slf4j" % "slf4j-api" % "2.0.13",
-  "org.slf4j" % "slf4j-simple" % "2.0.13"
-
+  "org.slf4j" % "slf4j-simple" % "2.0.13",
+  "org.tpolecat" %% "doobie-core" % "1.0.0-RC5",
+  "org.tpolecat" %% "doobie-postgres" % "1.0.0-RC5",
+  "org.typelevel" %% "cats-core" % "2.12.0"
 )

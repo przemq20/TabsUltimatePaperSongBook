@@ -2,7 +2,6 @@ package utils
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import scala.jdk.CollectionConverters._
 import scala.util.Properties
 
 class ConfigReader(configPath: String) {

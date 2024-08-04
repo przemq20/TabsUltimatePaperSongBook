@@ -43,6 +43,8 @@ object TekstowoUnrecognizedSongs {
         "https://www.tekstowo.pl/piosenka,daria_zawialow__dawid_podsiadlo,nikt_tak_pieknie_nie_mowil__ze_sie_boi_milosci.html"
       case ("Misc Cartoons", "Vaiana - Drobnostka")                                                   =>
         "https://www.tekstowo.pl/piosenka,igor_kwiatkowski,drobnostka.html"
+      case ("Męskie Granie Orkiestra 2023/Igo, Mrozu & Vito Bambino", "Supermoce")                    =>
+        "https://www.tekstowo.pl/piosenka,igor_kwiatkowski,drobnostka.html"
 
       case (_, _) => s"https://www.tekstowo.pl/piosenka,${tekstowoTitle(author)},${tekstowoTitle(title)}.html"
     }

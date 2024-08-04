@@ -50,7 +50,7 @@ object Capo {
       case "11th fret" => Some(`11thFret`)
 
       case a @ _ =>
-        if (a.trim.isEmpty) scribe.warn(s"Not recognized capo option: $a")
+        if (a.trim.nonEmpty) scribe.warn(s"Not recognized capo option: $a")
         None
     }
   }

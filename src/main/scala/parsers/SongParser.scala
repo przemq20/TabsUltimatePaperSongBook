@@ -22,8 +22,13 @@ class SongParser extends Parser[Song] {
 
   def parse(song: Song): Song = {
     if (postgresConnector.songTable.isSonginDB(song)) {
-      scribe.info(s"Song ${song.title} exists in DB")
-      postgresConnector.songTable.getSong(song).head.toSong
+      try {
+        scribe.info(s"Song ${song.title} exists in DB")
+        val retrievedSong =
+          postgresConnector.songTable.getSong(song).head.toSong
+        scribe.info(s"[Completed] Song ${song.title} downloaded from DB")
+        retrievedSong
+      }
     } else {
       System.setProperty("webdriver.gecko.driver", "/usr/local/bin/geckodriver")
       val options = new FirefoxOptions()

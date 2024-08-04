@@ -36,7 +36,7 @@ class SongListParser extends Parser[List[Song]] {
 
       Song(author, title, url)
     })
-    scribe.info("Downloading songs playlist completed")
+    scribe.info(s"Downloading songs playlist completed, playlist contains ${songs.size} songs")
 
     driver.quit()
     songs

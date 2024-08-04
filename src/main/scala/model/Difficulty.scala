@@ -23,7 +23,7 @@ object Difficulty {
       case "absolute beginner" => Some(AbsoluteBeginner)
       case "advanced"          => Some(Advanced)
       case a @ _               =>
-        if (a.trim.isEmpty) scribe.warn(s"Not recognized difficulty option: $a")
+        if (a.trim.nonEmpty) scribe.warn(s"Not recognized difficulty option: $a")
         None
     }
   }

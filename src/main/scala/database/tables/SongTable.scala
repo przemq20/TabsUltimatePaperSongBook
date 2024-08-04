@@ -39,9 +39,8 @@ class SongTable(xa: transactor.Transactor.Aux[IO, Unit]) {
   }
 
   def isSonginDB(song: Song): Boolean = {
-    val songList = getSongs
-    val songID   = generateSongId(song)
-    songList.map(_.ID).contains(songID)
+    val maybeSonginDB = getSong(song)
+    maybeSonginDB.nonEmpty
   }
 
   def insert(song: Song): Unit = {

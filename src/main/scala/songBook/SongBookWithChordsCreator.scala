@@ -8,12 +8,9 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr
 
 class SongBookWithChordsCreator extends SongBookCreator {
 
-  //  val songs = ExampleSongs.exampleSongs
   def createSongBook(songs: List[Song]): Unit = {
-    // Tworzenie nowego dokumentu
     val document = new XWPFDocument()
 
-    // Funkcja do dodania numerów stron w stopce
     def addPageNumbers(doc: XWPFDocument): Unit = {
       val headerFooterPolicy = doc.getHeaderFooterPolicy
 
@@ -30,7 +27,6 @@ class SongBookWithChordsCreator extends SongBookCreator {
       paragraph.getCTP.addNewFldSimple().setInstr("PAGE \\* MERGEFORMAT")
     }
 
-    // Ustawienie marginesów dla stron parzystych i nieparzystych
     def setPageMargins(section: CTSectPr, leftEven: Int, rightEven: Int, leftOdd: Int, rightOdd: Int): Unit = {
       val pageMar   = section.addNewPgMar()
       pageMar.setLeft(leftOdd)
@@ -46,11 +42,9 @@ class SongBookWithChordsCreator extends SongBookCreator {
       pgMarEven.setBottom(1440)
     }
 
-    // Dodanie pierwszej sekcji z marginesami
     val sectPr = document.getDocument.getBody.addNewSectPr()
     setPageMargins(sectPr, 720, 1440, 1440, 720)
 
-    // Dodanie strony tytułowej
     val titlePage = document.createParagraph()
     titlePage.setAlignment(ParagraphAlignment.CENTER)
     titlePage.setVerticalAlignment(TextAlignment.CENTER)
@@ -60,10 +54,8 @@ class SongBookWithChordsCreator extends SongBookCreator {
     runTitle.setBold(true)
     addPageBreak(document)
 
-    // Dodanie pustej strony
     addPageBreak(document)
 
-    // Dodanie spisu treści
     val tocPage = document.createParagraph()
     tocPage.setAlignment(ParagraphAlignment.LEFT)
     val runTOC  = tocPage.createRun()
@@ -81,7 +73,6 @@ class SongBookWithChordsCreator extends SongBookCreator {
     }
     addPageBreak(document)
 
-    // Dodanie piosenek
     songs.zipWithIndex.foreach { tuple =>
       val song      = tuple._1
       val header    = document.createParagraph()
@@ -103,7 +94,6 @@ class SongBookWithChordsCreator extends SongBookCreator {
       )
       runInfo.setFontSize(11)
 
-      // Podziel tekst na dwie kolumny
       val textTable = document.createTable()
       textTable.removeBorders()
 
@@ -132,7 +122,6 @@ class SongBookWithChordsCreator extends SongBookCreator {
       addPageBreak(document)
     }
 
-    // Zapisywanie dokumentu do pliku
     val out = new FileOutputStream("spiewnik.docx")
     document.write(out)
     out.close()
@@ -140,7 +129,6 @@ class SongBookWithChordsCreator extends SongBookCreator {
 
     println("Document created successfully!")
 
-    // Funkcja dodająca przerwę stronicową do dokumentu
 
   }
   def addPageBreak(document: XWPFDocument): Unit = {
