@@ -85,7 +85,7 @@ class SongBookWithoutChordsCreator extends SongBookCreator {
     out.close()
     document.close()
 
-    println("Document created successfully!")
+    scribe.info("Document created successfully!")
 
   }
   def addPageBreak(document: XWPFDocument): Unit = {

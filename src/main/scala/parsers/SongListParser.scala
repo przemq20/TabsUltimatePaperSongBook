@@ -1,13 +1,15 @@
 package parsers
 
+import database.PostgresConnector
 import model.Song
 import org.openqa.selenium.By
 import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.firefox.FirefoxDriverLogLevel
 import org.openqa.selenium.firefox.FirefoxOptions
+
 import scala.jdk.CollectionConverters._
 
-class SongListParser extends Parser[List[Song]] {
+class SongListParser(postgresConnector: PostgresConnector) extends Parser[List[Song]] {
 
   def removeVersionInfo(title: String): String = {
     title.replaceAll("\\s*\\(ver.*?\\)", "").replaceAll("\\s*\\(.*?\\)", "")
@@ -36,9 +38,11 @@ class SongListParser extends Parser[List[Song]] {
 
       Song(author, title, url)
     })
+    driver.quit()
     scribe.info(s"Downloading songs playlist completed, playlist contains ${songs.size} songs")
 
-    driver.quit()
+    def songsInDB = postgresConnector.songTable.getSongs
+    scribe.info(s"DB contains ${songsInDB.size} songs")
     songs
   }
 }

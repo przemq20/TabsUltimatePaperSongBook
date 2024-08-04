@@ -1,5 +1,6 @@
 package flow
 
+import database.PostgresConnector
 import java.text.Collator
 import java.util.Locale
 import model.Song
@@ -15,6 +16,7 @@ import org.apache.pekko.stream.scaladsl.Merge
 import org.apache.pekko.stream.scaladsl.RestartFlow
 import org.apache.pekko.stream.scaladsl.Sink
 import org.apache.pekko.stream.scaladsl.Source
+import org.postgresql.util.PSQLException
 import parsers.SongListParser
 import parsers.SongParser
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -29,17 +31,18 @@ import songBook.SongBookWithoutChordsCreator
 class CreateSongbookFlow {
   implicit val system: ActorSystem = ActorSystem("QuickStart")
 
-  val songListParser       = new SongListParser
+  val postgresConnector    = new PostgresConnector
+  val songListParser       = new SongListParser(postgresConnector)
   val creatorWithChords    = new SongBookWithChordsCreator
   val creatorWithoutChords = new SongBookWithoutChordsCreator
 
   def retryFlow[T, Mat](flow: Flow[T, T, NotUsed], retries: Int): Flow[T, T, NotUsed] = {
-    RestartFlow.onFailuresWithBackoff(
+    RestartFlow.withBackoff(
       settings = RestartSettings(
         minBackoff   = 100.milliseconds,
         maxBackoff   = 10.seconds,
         randomFactor = 0.2
-      )
+      ).withMaxRestarts(retries, 1.seconds)
     ) { () =>
       {
         scribe.warn("Restarting Flow")
@@ -61,7 +64,11 @@ class CreateSongbookFlow {
     val downloadSongDetailsFlow: Flow[Song, Song, NotUsed] =
       Flow[Song].mapAsync(parallelism = 4)(elem =>
         Future {
-          (new SongParser).parse(elem)
+          (new SongParser(postgresConnector)).parse(elem)
+        }.recoverWith {
+          case e: PSQLException => Future {
+              (new SongParser(postgresConnector)).parse(elem)
+            }
         }
       )
 
@@ -75,7 +82,7 @@ class CreateSongbookFlow {
         scribe.info(s"Retrieved ${elem.size} songs")
         elem.filter(_.lyrics.size < 2).foreach(e => scribe.error(s"${e.title}, ${e.author}"))
         val collator:                Collator       = Collator.getInstance(new Locale.Builder().setLanguage("pl").setRegion("PL").build)
-        implicit val personOrdering: Ordering[Song] = Ordering.by { song: Song =>
+        implicit val songOrdering: Ordering[Song] = Ordering.by { song: Song =>
           (collator.getCollationKey(song.author), collator.getCollationKey(song.title))
         }
         elem.sorted

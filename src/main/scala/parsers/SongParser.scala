@@ -11,9 +11,7 @@ import org.openqa.selenium.firefox.FirefoxDriverLogLevel
 import org.openqa.selenium.firefox.FirefoxOptions
 import scala.jdk.CollectionConverters._
 
-class SongParser extends Parser[Song] {
-
-  val postgresConnector = new PostgresConnector
+class SongParser(postgresConnector: PostgresConnector) extends Parser[Song] {
 
   def getAttribute(attributes: List[String], attrName: String): Option[String] = {
     val opt = attributes.find(text => text.contains(attrName)).map(difficulty => difficulty.split(": ").toList)

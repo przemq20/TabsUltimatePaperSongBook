@@ -6,6 +6,7 @@ import database.model.SongDBModel.generateSongId
 import doobie.implicits._
 import doobie.util.transactor
 import model.Song
+import scala.concurrent.duration.DurationInt
 
 class SongTable(xa: transactor.Transactor.Aux[IO, Unit]) {
   private val dropQuery =
@@ -58,12 +59,15 @@ class SongTable(xa: transactor.Transactor.Aux[IO, Unit]) {
     }
   }
 
-  def getSongs: List[SongDBModel] = {
-    sql"select * from songs"
+  def getSongs: List[Song] = {
+    val songsInDB = sql"select * from songs"
       .query[SongDBModel]
       .to[List]
       .transact(xa)
+      .timeout(1.minute)
       .unsafeRunSync()
+
+    songsInDB.map(_.toSong)
   }
 
   def getSong(song: Song): List[SongDBModel] = {
@@ -72,6 +76,7 @@ class SongTable(xa: transactor.Transactor.Aux[IO, Unit]) {
       .query[SongDBModel]
       .to[List]
       .transact(xa)
+      .timeout(1.minute)
       .unsafeRunSync()
   }
 
