@@ -1,6 +1,7 @@
 package flow
 
 import database.PostgresConnector
+import database.model.SongDBModel
 import java.text.Collator
 import java.util.Locale
 import model.Song
@@ -58,16 +59,30 @@ class CreateSongbookFlow {
         songListParser.parse("https://www.ultimate-guitar.com/user/playlist/shared?h=2ObfL4i1q7qG79B6kJPztWy5")
       )
 
+    val getNotDownloadedSongsFlow: Flow[List[Song], List[Song], NotUsed] = {
+      val songsInDB = postgresConnector.songTable.getSongs
+      Flow[List[Song]].map(songs =>
+        songs.filterNot(song => songsInDB.map(s => SongDBModel.generateSongId(s)).contains(SongDBModel.generateSongId(song)))
+      )
+    }
+
+    val printSongsToDownloadFlow: Flow[List[Song], List[Song], NotUsed] = {
+      Flow[List[Song]].map(songs => {
+        songs.foreach(song => scribe.info(s"To download: ${song.title} ${song.author}"))
+        songs
+      })
+    }
+
     val splitListIntoSongsFlow: Flow[List[Song], Song, NotUsed] =
       Flow[List[Song]].mapConcat(identity)
 
     val downloadSongDetailsFlow: Flow[Song, Song, NotUsed] =
       Flow[Song].mapAsync(parallelism = 4)(elem =>
         Future {
-          (new SongParser(postgresConnector)).parse(elem)
+          new SongParser(postgresConnector).parse(elem)
         }.recoverWith {
           case e: PSQLException => Future {
-              (new SongParser(postgresConnector)).parse(elem)
+              new SongParser(postgresConnector).parse(elem)
             }
         }
       )
@@ -81,7 +96,7 @@ class CreateSongbookFlow {
       Flow[List[Song]].map(elem => {
         scribe.info(s"Retrieved ${elem.size} songs")
         elem.filter(_.lyrics.size < 2).foreach(e => scribe.error(s"${e.title}, ${e.author}"))
-        val collator:                Collator       = Collator.getInstance(new Locale.Builder().setLanguage("pl").setRegion("PL").build)
+        val collator:              Collator       = Collator.getInstance(new Locale.Builder().setLanguage("pl").setRegion("PL").build)
         implicit val songOrdering: Ordering[Song] = Ordering.by { song: Song =>
           (collator.getCollationKey(song.author), collator.getCollationKey(song.title))
         }
@@ -111,6 +126,8 @@ class CreateSongbookFlow {
     })
 
     downloadSongListSource
+      //      .via(getNotDownloadedSongsFlow)
+      //      .via(printSongsToDownloadFlow)
       .via(splitListIntoSongsFlow)
       .via(detailsFlowRetry)
       .via(concatenateSongs)

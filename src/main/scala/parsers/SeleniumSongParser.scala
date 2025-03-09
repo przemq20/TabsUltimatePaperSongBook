@@ -17,7 +17,6 @@ class SeleniumSongParser extends Parser[Song] {
   }
 
   def parse(songs: List[Song]): List[Song] = {
-    System.setProperty("webdriver.gecko.driver", "/usr/local/bin/geckodriver")
     val options  = new FirefoxOptions()
     options.setHeadless(true)
     val driver   = new FirefoxDriver(options)

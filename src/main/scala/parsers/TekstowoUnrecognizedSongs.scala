@@ -37,8 +37,16 @@ object TekstowoUnrecognizedSongs {
         "https://www.tekstowo.pl/piosenka,myslovitz,nigdy_nie_znajdziesz_sobie_przyjaciol__.html"
       case ("Taylor Swift", "Love Story - You Belong With Me Live")                                   =>
         "https://www.tekstowo.pl/piosenka,taylor_swift,love_story.html"
-      case ("Edyta Górniak and Mieczysław Szcześniak", "Dumka Na Dwa Serca")                          =>
+      case (_, "Dumka Na Dwa Serca")                          =>
         "https://www.tekstowo.pl/piosenka,edyta_gorniak,dumka_na_dwa_serca.html"
+      case (_, "Sto Lat")                          =>
+        "https://www.tekstowo.pl/piosenka,przyspiewki_weselne,sto_lat__weselne.html"
+      case (_, "Soft")                          =>
+        "https://www.tekstowo.pl/piosenka,video,soft.html"
+      case (_, "Proszę Księdza Bernardyna")                          =>
+        "https://www.tekstowo.pl/piosenka,wojtek_szumanski,prosze_ksiedza_bernardyna.html"
+      case (_, "Carry You Home")                          =>
+        "https://www.tekstowo.pl/piosenka,alex_warren,carry_you_home.html"
       case ("Męskie Granie Orkiestra 2021", "Nikt Tak Pięknie Nie Mówił Że Się Boi Miłości")          =>
         "https://www.tekstowo.pl/piosenka,daria_zawialow__dawid_podsiadlo,nikt_tak_pieknie_nie_mowil__ze_sie_boi_milosci.html"
       case ("Misc Cartoons", "Vaiana - Drobnostka")                                                   =>

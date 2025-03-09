@@ -13,7 +13,7 @@ class TekstowoParser extends App {
         case _ if acc.size > 1 && line.trim.nonEmpty && acc.takeRight(2).forall(_.trim.isEmpty) => acc.dropRight(1) :+ line
         case _ if acc.size > 1 && line.trim.isEmpty && acc.takeRight(1).forall(_.trim.isEmpty)  => acc :+ line
         case _ if acc.size > 1 && line.trim.nonEmpty && acc.last.trim.isEmpty                   => acc.dropRight(1) :+ line
-        case _ if acc.size > 0 && line.trim.isEmpty && acc.takeRight(1).forall(_.trim.nonEmpty) => acc :+ line
+        case _ if acc.nonEmpty && line.trim.isEmpty && acc.takeRight(1).forall(_.trim.nonEmpty) => acc :+ line
         case _                                                                                  => acc :+ line
       }
     }

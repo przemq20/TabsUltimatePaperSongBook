@@ -26,9 +26,12 @@ class SongParser(postgresConnector: PostgresConnector) extends Parser[Song] {
           postgresConnector.songTable.getSong(song).head.toSong
         scribe.info(s"[Completed] Song ${song.title} downloaded from DB")
         retrievedSong
+      } catch {
+        case e: Exception =>
+          scribe.error(s"Error while retrieving song ${song.title} from DB")
+          throw e
       }
     } else {
-      System.setProperty("webdriver.gecko.driver", "/usr/local/bin/geckodriver")
       val options = new FirefoxOptions()
       options.setHeadless(true)
       options.setLogLevel(FirefoxDriverLogLevel.FATAL)
@@ -47,7 +50,7 @@ class SongParser(postgresConnector: PostgresConnector) extends Parser[Song] {
         val tuning              = getAttribute(htmlProductElements, "Tuning")
         val key                 = getAttribute(htmlProductElements, "Key").flatMap(k => Key.fromString(k))
         val capo                = getAttribute(htmlProductElements, "Capo").flatMap(c => Capo.fromString(c))
-        val text                = driver.findElement(By.cssSelector(".tK8GG")).getText.split("\n").toList
+        val text                = driver.findElement(By.cssSelector(".xNWlr")).getText.split("\n").toList
         val tekstowo            = new TekstowoParser
         val lyrics              = tekstowo.parse(song.author, title)
         scribe.info(s"[COMPLETED] Downloading info from ${song.title}")
