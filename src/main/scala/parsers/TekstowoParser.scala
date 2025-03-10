@@ -19,14 +19,14 @@ class TekstowoParser extends App {
     }
   }
 
-  def parseJsoup(url: String): List[String] = {
+  def parseJsoup(url: String, author: String, title: String): List[String] = {
     val a = Jsoup.connect(url).timeout(1000 * 10).get()
     val lyrics: List[String] = a.select(".song-text").select(".inner-text").get(0).wholeText()
       .replaceAll("\n\r\n", "\n\n")
       .split("\n")
       .toList
     val newL = processLines(lyrics)
-//    println(newL)
+    scribe.info(s"[Completed] Downloaded lyrics for $author - $title; $url")
     newL
 
   }
@@ -34,22 +34,31 @@ class TekstowoParser extends App {
   def parse(author: String, title: String): List[String] = {
     val url = TekstowoUnrecognizedSongs.getUrl(author, title)
     try {
-      parseJsoup(url)
+      parseJsoup(url, author, title)
     } catch {
       case e: Exception =>
-        scribe.warn(s"Trying to get alternative link to $title lyrics")
-        val url           = s"https://www.tekstowo.pl/szukaj,${tekstowoSearch(author, title)}.html"
-        val response      = Jsoup.connect(url).timeout(1000 * 10).get()
-        val maybeSongLink = response.select(".flex-group")
-        if (maybeSongLink.size() > 0) {
-          val songLink = s"https://www.tekstowo.pl${maybeSongLink.get(0).children().get(1).attributes().get("href")}"
-          scribe.info(s"Got alternative link to $title lyrics - $songLink")
-          val lyrics   = parseJsoup(songLink)
-          lyrics
-        } else {
-          scribe.error(s"Couldn't downolad lyrics for: $author-$title, url: $url - ${e.getMessage}")
-          List("ERROR - No TEXT")
+        try {
+          getAltLyrics(author, title, Some(e))
+        } catch {
+          case _: Exception =>
+            getAltLyrics("", title, Some(e))
         }
+    }
+  }
+
+  def getAltLyrics(author: String, title: String, e:Option[Exception]): List[String] = {
+    scribe.warn(s"Trying to get alternative link to $title lyrics")
+    val url           = s"https://www.tekstowo.pl/szukaj,${tekstowoSearch("", title)}.html"
+    val response      = Jsoup.connect(url).timeout(1000 * 10).get()
+    val maybeSongLink = response.select(".flex-group")
+    if (maybeSongLink.size() > 0) {
+      val songLink = s"https://www.tekstowo.pl${maybeSongLink.get(0).children().get(1).attributes().get("href")}"
+      scribe.info(s"Got alternative link to $title lyrics - $songLink")
+      val lyrics   = parseJsoup(songLink, author, title)
+      lyrics
+    } else {
+      scribe.error(s"Couldn't downolad lyrics for: $author-$title, url: $url - ${e.map(ex => ex.getMessage)}")
+      List("ERROR - No TEXT")
     }
   }
 }
