@@ -3,7 +3,6 @@ package parsers
 import database.PostgresConnector
 import model.Song
 import org.openqa.selenium.By
-import org.openqa.selenium.WebElement
 import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.firefox.FirefoxDriverLogLevel
 import org.openqa.selenium.firefox.FirefoxOptions
