@@ -26,6 +26,14 @@ class SongParser(postgresConnector: PostgresConnector) extends Parser[Song] {
           postgresConnector.songTable.getSong(song).head.toSong
         scribe.info(s"[Completed] Song ${song.title} downloaded from DB")
         retrievedSong
+      } catch {
+        case _: Throwable =>
+//          song.copy(lyrics = List("ERROR - lyrics not downloaded from DB"))
+          scribe.info(s"Song ${song.title} exists in DB")
+          val retrievedSong =
+            postgresConnector.songTable.getSong(song).head.toSong
+          scribe.info(s"[Completed] Song ${song.title} downloaded from DB")
+          retrievedSong
       }
     } else {
       System.setProperty("webdriver.gecko.driver", "/usr/local/bin/geckodriver")

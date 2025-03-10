@@ -23,5 +23,7 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-simple" % "2.0.13",
   "org.tpolecat" %% "doobie-core" % "1.0.0-RC5",
   "org.tpolecat" %% "doobie-postgres" % "1.0.0-RC5",
-  "org.typelevel" %% "cats-core" % "2.12.0"
+  "org.typelevel" %% "cats-core" % "2.12.0",
+  "org.docx4j" % "docx4j-core" % "11.4.11",
+  "org.glassfish.jaxb" % "jaxb-runtime" % "4.0.5"
 )

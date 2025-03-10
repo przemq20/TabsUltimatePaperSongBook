@@ -43,8 +43,18 @@ object TekstowoUnrecognizedSongs {
         "https://www.tekstowo.pl/piosenka,daria_zawialow__dawid_podsiadlo,nikt_tak_pieknie_nie_mowil__ze_sie_boi_milosci.html"
       case ("Misc Cartoons", "Vaiana - Drobnostka")                                                   =>
         "https://www.tekstowo.pl/piosenka,igor_kwiatkowski,drobnostka.html"
-      case ("Męskie Granie Orkiestra 2023/Igo, Mrozu & Vito Bambino", "Supermoce")                    =>
-        "https://www.tekstowo.pl/piosenka,igor_kwiatkowski,drobnostka.html"
+      case (_, "Supermoce")                                                                           =>
+        "https://www.tekstowo.pl/piosenka,meskie_granie_orkiestra_2023__igo__mrozu__vito_bambino_,supermoce.html"
+      case (_, "Bieszczadzki Trakt")                                                                  =>
+        "https://www.tekstowo.pl/piosenka,harcerska,bieszczadzki_trakt.html"
+      case (_, "Hej Sokoły")                                                                          =>
+        "https://www.tekstowo.pl/piosenka,ukraina,hej_sokoly.html"
+      case (_, "Kraina Lodu - Mam Tę Moc")                                                            =>
+        "https://www.tekstowo.pl/piosenka,katarzyna_laska,mam_te_moc.html"
+      case (_, "Toy Story - Druha We Mnie Masz")                                                      =>
+        "https://www.tekstowo.pl/piosenka,toy_story,ty_druha_we_mnie_masz_.html"
+      case (_, "I Ciebie Też Bardzo")                                                      =>
+        "https://www.tekstowo.pl/piosenka,vito_bambino__dawid_podsiadlo__daria_zawialow,i_ciebie_tez__bardzo.html"
 
       case (_, _) => s"https://www.tekstowo.pl/piosenka,${tekstowoTitle(author)},${tekstowoTitle(title)}.html"
     }
@@ -60,7 +70,8 @@ object TekstowoUnrecognizedSongs {
   }
 
   def tekstowoSearch(author: String, title: String): String = {
-    s"$author+$title".map { char =>
+    val maybeAuthor = if (author == "Inne") "" else author
+    s"$maybeAuthor+$title".map { char =>
       replacements.getOrElse(char, char)
     }.toLowerCase
       .replace(" ", "+")

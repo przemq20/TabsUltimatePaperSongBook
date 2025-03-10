@@ -1,6 +1,8 @@
 import flow.CreateSongbookFlow
+import utils.ConfigReader
 
 object Main extends App {
-  val flow = new CreateSongbookFlow
+  val config = new ConfigReader("TabsUltimate")
+  val flow = new CreateSongbookFlow(config)
   flow.createSongbooks()
 }

@@ -46,13 +46,23 @@ class SongBookWithoutChordsCreator extends SongBookCreator {
     runTOC.setFontSize(24)
     runTOC.setBold(true)
 
+    var lastAuthor = ""
     songs.zipWithIndex.foreach {
       case (song, index) =>
+        if (lastAuthor != song.author) {
+          val tocEntry = document.createParagraph()
+          tocEntry.setAlignment(ParagraphAlignment.LEFT)
+          val runEntry = tocEntry.createRun()
+          runEntry.setText(s"${song.author}")
+          runEntry.setFontSize(8)
+          runEntry.setBold(true)
+          lastAuthor = song.author
+        }
         val tocEntry = document.createParagraph()
         tocEntry.setAlignment(ParagraphAlignment.LEFT)
         val runEntry = tocEntry.createRun()
-        runEntry.setText(s"${index + 1}. ${song.author} - ${song.title}")
-        runEntry.setFontSize(10)
+        runEntry.setText(s"${index + 1}. ${song.title}")
+        runEntry.setFontSize(7)
     }
     addPageBreak(document)
 
@@ -65,18 +75,20 @@ class SongBookWithoutChordsCreator extends SongBookCreator {
       runHeader.setFontSize(12)
       runHeader.setBold(true)
 
-
-      song.lyrics.map(l => s"$l\n").foreach { line =>
+      song.lyrics.foreach { line =>
         val paragraph = document.createParagraph()
         val run       = paragraph.createRun()
+        run.setFontSize(8)
         run.setText(line)
-        run.setFontSize(10)
+        run.setFontSize(8)
+
       }
 
       val paragraph = document.createParagraph()
       val run       = paragraph.createRun()
+//      run.addBreak(BreakType.COLUMN)
       run.setText("\n")
-      run.setFontSize(10)
+      run.setFontSize(8)
 //      addPageBreak(document)
     }
 
