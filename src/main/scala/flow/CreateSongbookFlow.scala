@@ -28,9 +28,12 @@ import scala.util.Success
 import songBook.SongBookCreator
 import songBook.SongBookWithChordsCreator
 import songBook.SongBookWithoutChordsCreator
+import utils.ConfigReader
 
-class CreateSongbookFlow {
-  implicit val system: ActorSystem = ActorSystem("QuickStart")
+class CreateSongbookFlow(config: ConfigReader) {
+  implicit val system: ActorSystem = ActorSystem("TabsUltimate")
+
+  final val playlistURL = config.getVariableString("playlistURL")
 
   val postgresConnector    = new PostgresConnector
   val songListParser       = new SongListParser(postgresConnector)
@@ -38,7 +41,7 @@ class CreateSongbookFlow {
   val creatorWithoutChords = new SongBookWithoutChordsCreator
 
   def retryFlow[T, Mat](flow: Flow[T, T, NotUsed], retries: Int): Flow[T, T, NotUsed] = {
-    RestartFlow.withBackoff(
+    RestartFlow.onFailuresWithBackoff(
       settings = RestartSettings(
         minBackoff   = 100.milliseconds,
         maxBackoff   = 10.seconds,
@@ -56,7 +59,7 @@ class CreateSongbookFlow {
 
     val downloadSongListSource: Source[List[Song], NotUsed] =
       Source.single(
-        songListParser.parse("https://www.ultimate-guitar.com/user/playlist/shared?h=2ObfL4i1q7qG79B6kJPztWy5")
+        songListParser.parse(playlistURL)
       )
 
     val getNotDownloadedSongsFlow: Flow[List[Song], List[Song], NotUsed] = {

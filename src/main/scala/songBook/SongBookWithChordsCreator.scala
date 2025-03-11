@@ -78,7 +78,7 @@ class SongBookWithChordsCreator extends SongBookCreator {
       val tocRun = tocParagraph.createRun()
       tocRun.setText(s"${index + 1}. ${song.author} - ${song.title}")
       tocRun.setFontSize(12)
-      tocRun.addBreak()
+//      tocRun.addBreak()
     }
     document.createParagraph().createRun().addBreak(BreakType.PAGE)
   }
@@ -101,7 +101,7 @@ class SongBookWithChordsCreator extends SongBookCreator {
       val run = paragraph.createRun()
       run.setText(s"Difficulty: ${difficulty.toString}")
       run.setFontSize(12)
-      run.addBreak()
+//      run.addBreak()
     }
     song.key.foreach { key =>
       val paragraph = document.createParagraph()
@@ -109,7 +109,7 @@ class SongBookWithChordsCreator extends SongBookCreator {
       val run = paragraph.createRun()
       run.setText(s"Key: ${key.toString}")
       run.setFontSize(12)
-      run.addBreak()
+//      run.addBreak()
     }
     song.capo.foreach { capo =>
       val paragraph = document.createParagraph()
@@ -117,7 +117,7 @@ class SongBookWithChordsCreator extends SongBookCreator {
       val run = paragraph.createRun()
       run.setText(s"Capo: ${capo.toString}")
       run.setFontSize(12)
-      run.addBreak()
+//      run.addBreak()
     }
     song.tuning.foreach { tuning =>
       val paragraph = document.createParagraph()
@@ -125,7 +125,7 @@ class SongBookWithChordsCreator extends SongBookCreator {
       val run = paragraph.createRun()
       run.setText(s"Tuning: $tuning")
       run.setFontSize(12)
-      run.addBreak()
+//      run.addBreak()
     }
 
     // Song text with bold chords
@@ -143,7 +143,7 @@ class SongBookWithChordsCreator extends SongBookCreator {
           run.setText(part + " ")
         }
       }
-      run.addBreak()
+//      run.addBreak()
     }
   }
 
