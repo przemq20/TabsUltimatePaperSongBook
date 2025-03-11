@@ -66,6 +66,13 @@ class CreateSongbookFlow {
       )
     }
 
+    val getDownloadedSongsFlow: Flow[List[Song], List[Song], NotUsed] = {
+      val songsInDB = postgresConnector.songTable.getSongs
+      Flow[List[Song]].map(songs =>
+        songs.filter(song => songsInDB.map(s => SongDBModel.generateSongId(s)).contains(SongDBModel.generateSongId(song)))
+      )
+    }
+
     val printSongsToDownloadFlow: Flow[List[Song], List[Song], NotUsed] = {
       Flow[List[Song]].map(songs => {
         songs.foreach(song => scribe.info(s"To download: ${song.title} ${song.author}"))
@@ -81,7 +88,7 @@ class CreateSongbookFlow {
         Future {
           new SongParser(postgresConnector).parse(elem)
         }.recoverWith {
-          case e: PSQLException => Future {
+          case _: PSQLException => Future {
               new SongParser(postgresConnector).parse(elem)
             }
         }
@@ -125,11 +132,30 @@ class CreateSongbookFlow {
 
     })
 
+    def downloadSongsFromDB: Flow[List[Song], List[Song], NotUsed] = {
+      val songsInDb = postgresConnector.songTable.getSongs
+      Flow[List[Song]].map(songs => songs.flatMap(song => songsInDb.find(SongDBModel.generateSongId(_) == SongDBModel.generateSongId(song))))
+    }
+
+    val getSongsFlow = Flow.fromGraph(GraphDSL.create() { implicit builder: GraphDSL.Builder[NotUsed] =>
+      val bcast = builder.add(Broadcast[List[Song]](2))
+      val merge = builder.add(Merge[Song](2))
+
+      bcast.out(0) ~> getDownloadedSongsFlow  ~> downloadSongsFromDB ~> splitListIntoSongsFlow ~> merge.in(0)
+      bcast.out(1) ~> getNotDownloadedSongsFlow ~> printSongsToDownloadFlow ~> splitListIntoSongsFlow ~>detailsFlowRetry ~> merge.in(1)
+      FlowShape(bcast.in, merge.out)
+
+    })
+
+
+
+
     downloadSongListSource
       //      .via(getNotDownloadedSongsFlow)
       //      .via(printSongsToDownloadFlow)
-      .via(splitListIntoSongsFlow)
-      .via(detailsFlowRetry)
+//      .via(splitListIntoSongsFlow)
+//      .via(detailsFlowRetry)
+      .via(getSongsFlow)
       .via(concatenateSongs)
       .via(printTitlesAndSort)
       .via(createSongbooksBiFlow)
