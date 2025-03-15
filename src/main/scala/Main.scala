@@ -1,4 +1,4 @@
-import flow.CreateSongbookFlow
+import flow.MainFlow
 import utils.ConfigReader
 
 object Main extends App {
@@ -7,6 +7,6 @@ object Main extends App {
     case "Linux" => System.setProperty("webdriver.gecko.driver", "/usr/local/bin/geckodriver")
   }
   val config = new ConfigReader("TabsUltimate")
-  val flow = new CreateSongbookFlow(config)
+  val flow = new MainFlow(config)
   flow.createSongbooks()
 }
